@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>15-Puzzle</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<div class="instruction">
+		<h1>Instructions</h1>
+		<ul>
+			<li>You can play game by swiping on mobile, for laptop use direction Keys.</li>
+			<li>Made By Sujal.</li>
+			<li>Select game grid.</li>
+		</ul>
+		<div class="enterGameSize">
+			<label>
+				<input type="radio" name="grid" value="3" class="single-select-checkbox">
+				3x3
+			</label>
+
+			<label>
+				<input type="radio" name="grid" value="4" class="single-select-checkbox" checked>
+				4x4
+			</label>
+
+			<label>
+				<input type="radio" name="grid" value="5" class="single-select-checkbox">
+				5x5
+			</label>
+		</div>
+		<button id="play" onclick="beginGame()">Play</button>
+	</div>
+	<div class="best">
+		Best Completion time: <span id="bestTime">00</span>s
+	</div>
+	<div class="gameContainer">
+		<div class="gameBoard">
+			<span class="box">TIMES <div id="time">00</div></span>
+			<span class="box">MOVES <div id="count">00</div></span>
+		</div>
+		<div class="gameBox">
+		</div>
+		<div class="controls">
+			<button class="btn" onclick="beginGame()">RESET</button>
+			<button class="btn" onclick="toggleTimer()" id="timerBtn">PAUSE</button>
+		</div>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+
+</html>

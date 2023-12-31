@@ -86,18 +86,18 @@ function handleTouchMove(event) {
     if (resume) {
         if (absDeltaX > absDeltaY) {
             // Horizontal swipe
-            if (deltaX > 0 && isRightValid(position, position + 1, gridSize)) {  // Swipe right
+            if (deltaX < 0 && isRightValid(position, position + 1, gridSize)) {  // Swipe right
                 swapAndUpdate(position, position + 1);
             }
-            else if (deltaX < 0 && isLeftValid(position, position - 1, gridSize)) { // Swipe left
+            else if (deltaX > 0 && isLeftValid(position, position - 1, gridSize)) { // Swipe left
                 swapAndUpdate(position, position - 1);
             }
         } else {
             // Vertical swipe
-            if (deltaY > 0 && down >= 0 && down <= arr.length) {  // Swipe down
+            if (deltaY < 0 && down >= 0 && down <= arr.length) {  // Swipe down
                 swapAndUpdate(position, down);
             }
-            else if (deltaY < 0 && up >= 0 && up <= arr.length) {  // Swipe Up
+            else if (deltaY > 0 && up >= 0 && up <= arr.length) {  // Swipe Up
                 swapAndUpdate(position, up);
             }
         }
@@ -346,24 +346,20 @@ function checkVictory() {
 // Best Score
 
 // Initialize cart from localStorage
-localStorage.setItem('best', 0)
-let best = JSON.parse(localStorage.getItem('best')) || [];
+// Initialize localStorage 'best' if not present
+if (!localStorage.getItem('best')) {
+    const initialBest = [
+        { best: 0, size: 3 },
+        { best: 0, size: 4 },
+        { best: 0, size: 5 }
+    ];
+    localStorage.setItem('best', JSON.stringify(initialBest));
+}
 
-best = [
-    {
-        best: 0,
-        size: 3
-    },
-    {
-        best: 0,
-        size: 4
-    },
-    {
-        best: 0,
-        size: 5
-    }
-]
+// Retrieve 'best' from localStorage
+let best = JSON.parse(localStorage.getItem('best'));
 
+// Save updated 'best' back to localStorage
 updateBest(best);
 
 function updateBest(newBest) {

@@ -148,16 +148,17 @@ function handleKeyPress(event) {
     const down = position + gridSize;
     const left = position - 1;
     const right = position + 1;
-
-    if (event.key === 'ArrowUp' && up >= 0 && up < arr.length) {
+if(resume){
+    if (event.key === 'ArrowDown' && up >= 0 && up < arr.length) {
         swapAndUpdate(position, up);
-    } else if (event.key === 'ArrowDown' && down >= 0 && down < arr.length) {
+    } else if (event.key === 'ArrowUp' && down >= 0 && down < arr.length) {
         swapAndUpdate(position, down);
-    } else if (event.key === 'ArrowLeft' && isLeftValid(position, left, gridSize)) {
+    } else if (event.key === 'ArrowRight' && isLeftValid(position, left, gridSize)) {
         swapAndUpdate(position, left);
-    } else if (event.key === 'ArrowRight' && isRightValid(position, right, gridSize)) {
+    } else if (event.key === 'ArrowLeft' && isRightValid(position, right, gridSize)) {
         swapAndUpdate(position, right);
     }
+}
 }
 
 function isRightValid(position, right, size) {

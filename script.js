@@ -44,20 +44,6 @@ function renderGameGrid(size) {
     playSoundEffect();
 }
 
-function beginGame() {
-    document.querySelector('.instruction').classList.toggle("display");
-    const gridSizeInput = document.querySelector('input[name="grid"]:checked');
-    gridSize = parseInt(gridSizeInput.value);
-    arr = shuffleSolvableArray(initializeGameGrid(gridSize));
-    renderGameGrid(gridSize);
-    clearInterval(timer);
-    time.textContent =  "0 s";
-    timerStarted = false;
-    bestTime.innerHTML = best;
-    counter = 0;
-    counterBox.textContent = counter;
-}
-
 const swipeArea = document.querySelector('.gameBox');
 let startX;
 let startY;
@@ -123,6 +109,11 @@ function handleTouchMove(event) {
 }
 
 function swapAndUpdate(currentPosition, targetPosition) {
+
+    if (!arr[currentPosition] || !arr[targetPosition]) {
+        return; // Invalid positions
+    }
+
     let temp = arr[currentPosition];
     arr[currentPosition] = arr[targetPosition];
     arr[targetPosition] = temp;
@@ -148,15 +139,19 @@ function swapAndUpdate(currentPosition, targetPosition) {
 document.addEventListener('keydown', handleKeyPress);
 
 function handleKeyPress(event) {
-    const position = arr.find(element => element.text === "").id;
+    const position = arr.findIndex(element => element.text === "");
+    if (position === -1) {
+        return; // No empty space found
+    }
+
     const up = position - gridSize;
     const down = position + gridSize;
     const left = position - 1;
     const right = position + 1;
 
-    if (event.key === 'ArrowUp' && up >= 0 && up <= arr.length) {
+    if (event.key === 'ArrowUp' && up >= 0 && up < arr.length) {
         swapAndUpdate(position, up);
-    } else if (event.key === 'ArrowDown' && down >= 0 && down <= arr.length) {
+    } else if (event.key === 'ArrowDown' && down >= 0 && down < arr.length) {
         swapAndUpdate(position, down);
     } else if (event.key === 'ArrowLeft' && isLeftValid(position, left, gridSize)) {
         swapAndUpdate(position, left);
@@ -175,67 +170,55 @@ function isLeftValid(position, left, size) {
 
 // Function to shuffle the elements in the array
 
-
-function isSolvable(arr) {
-    function countInversions(arr) {
-        let inversions = 0;
-        for (let i = 0; i < arr.length - 1; i++) {
-            if (arr[i].text == 0) continue; // Skip empty space
-            for (let j = i + 1; j < arr.length; j++) {
-                if (arr[i].text > arr[j].text && arr[j].text != 0) {
-                    inversions++;
-                }
-            }
-        }
-        return inversions;
+function shuffleArray() {
+    let moves = [{key: 'ArrowUp'},{key: 'ArrowDown'},{key: 'ArrowLeft'},{key: 'ArrowRight'}];
+    function getRandomElementFromArray(moves) {
+        const randomIndex = Math.floor(Math.random() * moves.length);
+        return moves[randomIndex];
     }
-
-    const inversions = countInversions(arr);
-
-    // Check solvability condition
-    if (gridSize % 2 === 1) {
-        // For odd-sized puzzles
-        return inversions % 2 === 0;
-    } else {
-        // For even-sized puzzles
-        const emptySpaceRow = Math.floor(arr.findIndex((element) => element.number === 0) / gridSize);
-        const emptySpaceRowFromBottom = gridSize - emptySpaceRow;
-
-        if (gridSize % 2 === 0 && emptySpaceRowFromBottom % 2 === 0) {
-            return inversions % 2 === 0;
-        } else if (gridSize % 2 === 0 && emptySpaceRowFromBottom % 2 === 1) {
-            return inversions % 2 === 1;
-        } else {
-            return (inversions + emptySpaceRow) % 2 === 0;
-        }
+    for(let i =0; i<1000; ++i){
+        handleKeyPress2(getRandomElementFromArray(moves));
     }
 }
 
-
-function shuffleSolvableArray(arr) {
-    let solvable = false;
-    let shuffledArray;
-
-    while (!solvable) {
-        shuffledArray = shuffleArray(arr);
-        solvable = isSolvable(shuffledArray);
+function handleKeyPress2(event) {
+    const position = arr.findIndex(element => element.text === "");
+    if (position === -1) {
+        return; // No empty space found
     }
 
-    return shuffledArray;
-}
+    const up = position - gridSize;
+    const down = position + gridSize;
+    const left = position - 1;
+    const right = position + 1;
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        // Swap elements
-        [array[i], array[j]] = [array[j], array[i]];
-        // Update ids to be the indices
-        array[i].id = i;
-        array[j].id = j;
+    if (event.key === 'ArrowUp' && up >= 0 && up < arr.length) {
+        swapAndUpdate2(position, up);
+    } else if (event.key === 'ArrowDown' && down >= 0 && down < arr.length) {
+        swapAndUpdate2(position, down);
+    } else if (event.key === 'ArrowLeft' && isLeftValid(position, left, gridSize)) {
+        swapAndUpdate2(position, left);
+    } else if (event.key === 'ArrowRight' && isRightValid(position, right, gridSize)) {
+        swapAndUpdate2(position, right);
     }
-    return array;
 }
 
+function swapAndUpdate2(currentPosition, targetPosition) {
+
+    if (!arr[currentPosition] || !arr[targetPosition]) {
+        return; // Invalid positions
+    }
+
+    let temp = arr[currentPosition];
+    arr[currentPosition] = arr[targetPosition];
+    arr[targetPosition] = temp;
+
+    // Update the ids and trigger reflow for the transition to take effect
+    arr[currentPosition].id = currentPosition;
+    arr[targetPosition].id = targetPosition;
+
+    renderGameGrid(gridSize);
+}
 
 // Instructions 
 var instructionsBox = document.querySelector(".instruction");
@@ -344,43 +327,67 @@ function checkVictory() {
     });
 
     if (isVictory) {
-        if (best > seconds) {
-            best = seconds;
+        let index = best.find(element => element.size === gridSize);
+        if (index.best > seconds) {
+            index.best = seconds;
             updateBest(best);
-            bestTime.innerHTML = best;
+            bestTime.innerHTML = index.best;
             console.log("Updated best time:", best);
-        } else if(best === 0) {
-            best = seconds;
+        } else if(index.best === 0) {
+            index.best = seconds;
             updateBest(best);
-            bestTime.innerHTML = best;
+            bestTime.innerHTML = index.best;
             console.log("Updated best time:", best);
         }
         victory();
     }
-    console.log(isVictory);
 }
 
 // Best Score
 
 // Initialize cart from localStorage
-// localStorage.setItem('best', 0)
-let best = JSON.parse(localStorage.getItem('best')) || 0;
+localStorage.setItem('best', 0)
+let best = JSON.parse(localStorage.getItem('best')) || [];
 
-console.log(best);
+best = [
+    {
+        best: 0,
+        size: 3
+    },
+    {
+        best: 0,
+        size: 4
+    },
+    {
+        best: 0,
+        size: 5
+    }
+]
+
+updateBest(best);
 
 function updateBest(newBest) {
     best = newBest;
     localStorage.setItem('best', JSON.stringify(best));
 }
 
-function getBest() {
-    return best;
-}
-
-function clearCart() {
-    best = 0;
-    updatebest(best);
-}
-
 let bestTime = document.querySelector("#bestTime");
+
+
+// Begin Game
+
+function beginGame() {
+    document.querySelector('.instruction').classList.toggle("display");
+    const gridSizeInput = document.querySelector('input[name="grid"]:checked');
+    gridSize = parseInt(gridSizeInput.value);
+    arr = initializeGameGrid(gridSize);
+    shuffleArray();
+    renderGameGrid(gridSize);
+    clearInterval(timer);
+    time.textContent =  "0 s";
+    timerStarted = false;
+    bestTime.innerHTML = best.find(element => element.size === gridSize).best;
+    counter = 0;
+    counterBox.textContent = counter;
+}
 
